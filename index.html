@@ -1,227 +1,494 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
 <meta charset="UTF-8">
-<title>Bangla Image OCR & Watermark Remover</title>
-<link href="https://fonts.googleapis.com/css2?family=Rubik+Moonrocks&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangla Text to Image Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Moonrocks&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  body {font-family: Arial, sans-serif; max-width: 900px; margin: 2rem auto; padding:0 1rem;}
-  h1 {text-align:center;}
-  #drop-zone {
-    border: 2px dashed #aaa; border-radius: 10px; padding: 2rem; text-align:center;
-    color:#666; cursor:pointer; margin-bottom:1rem;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'Noto Sans Bengali', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
   }
-  #drop-zone.hover {border-color:#666; background:#f9f9f9;}
-  .container {display: flex; gap: 2rem; margin-top:2rem;}
-  .preview {flex:1;}
-  .preview img, .preview canvas {max-width:100%; border:1px solid #ddd; margin:0.5rem 0;}
-  button {margin-top:0.5rem; padding:0.5rem 1rem; font-size:1rem; cursor:pointer;}
-  #status {margin-top:0.5rem; font-size:0.9rem; color:#555;}
-  textarea {width:100%; height:150px; padding:0.5rem; font-family:monospace;}
+
+  .container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    padding: 3rem;
+    max-width: 600px;
+    width: 100%;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-family: 'Noto Sans Bengali', Arial;
+    font-size: 1.1rem;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.3s;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+  }
+
+  .settings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .color-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .color-group label {
+    margin-bottom: 0.4rem;
+    font-size: 0.9rem;
+  }
+
+  .color-picker {
+    width: 100%;
+    height: 45px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    background: white;
+  }
+
+  .button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  button {
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 600;
+    font-family: 'Noto Sans Bengali', Arial;
+  }
+
+  #generateBtn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    grid-column: 1 / 3;
+  }
+
+  #generateBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  #generateBtn:active {
+    transform: translateY(0);
+  }
+
+  #downloadBtn {
+    background: #4CAF50;
+    color: white;
+    display: none;
+  }
+
+  #downloadBtn:hover {
+    background: #45a049;
+  }
+
+  #copyBtn {
+    background: #2196F3;
+    color: white;
+    display: none;
+  }
+
+  #copyBtn:hover {
+    background: #0b7dda;
+  }
+
+  .preview-section {
+    margin-top: 2rem;
+    text-align: center;
+    display: none;
+  }
+
+  .preview-section.active {
+    display: block;
+  }
+
+  #outputCanvas {
+    max-width: 100%;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  #status {
+    text-align: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    display: none;
+  }
+
+  #status.show {
+    display: block;
+  }
+
+  #status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  #status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+
+  #status.loading {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+
+  .template-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .templates {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+  }
+
+  .template-btn {
+    padding: 0.6rem;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+  }
+
+  .template-btn:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+  }
+
+  .template-btn.active {
+    border-color: #667eea;
+    background: #667eea;
+    color: white;
+  }
+
+  .font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  input[type="range"] {
+    flex: 1;
+  }
+
+  .size-display {
+    min-width: 50px;
+    text-align: center;
+    color: #667eea;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
 
-<h1>🖼️ Bangla Image OCR & Watermark Remover</h1>
-
-<div id="drop-zone">
-  Click or drag‑&‑drop an image here<br>
-  (or paste with <kbd>Ctrl+V</kbd>)
-</div>
-
-<input type="file" id="file-input" accept="image/*" style="display:none">
-<div id="status"></div>
-
 <div class="container">
-  <div class="preview">
-    <h3>Original Image</h3>
-    <img id="original-img" style="display:none;">
-  </div>
-  <div class="preview">
-    <h3>Watermark Removed</h3>
-    <canvas id="cleaned-canvas" style="display:none;"></canvas>
+  <h1>✨ বাংলা টেক্সট ইমেজ জেনারেটর</h1>
+  <p class="subtitle">আপনার বাংলা লেখা সুন্দর ছবিতে রূপান্তরিত করুন</p>
+
+  <form id="textForm">
+    <!-- Text Input -->
+    <div class="form-group">
+      <label for="textInput">📝 আপনার বাংলা লেখা লিখুন:</label>
+      <textarea 
+        id="textInput" 
+        placeholder="উদাহরণ: আমার নাম আবদুর রহমান"
+        required>
+      </textarea>
+    </div>
+
+    <!-- Template Selection -->
+    <div class="template-group">
+      <label>🎨 টেমপ্লেট নির্বাচন করুন:</label>
+      <div class="templates">
+        <button type="button" class="template-btn active" data-template="modern">আধুনিক</button>
+        <button type="button" class="template-btn" data-template="classic">ক্লাসিক</button>
+        <button type="button" class="template-btn" data-template="artistic">শিল্পকর্ম</button>
+        <button type="button" class="template-btn" data-template="minimal">মিনিমাল</button>
+        <button type="button" class="template-btn" data-template="dark">অন্ধকার</button>
+        <button type="button" class="template-btn" data-template="gradient">গ্রেডিয়েন্ট</button>
+      </div>
+    </div>
+
+    <!-- Customization Settings -->
+    <div class="settings">
+      <div class="color-group">
+        <label for="bgColor">পটভূমি রঙ:</label>
+        <input type="color" id="bgColor" class="color-picker" value="#f0f0f0">
+      </div>
+
+      <div class="color-group">
+        <label for="textColor">লেখার রঙ:</label>
+        <input type="color" id="textColor" class="color-picker" value="#333333">
+      </div>
+    </div>
+
+    <!-- Font Size Control -->
+    <div class="form-group">
+      <label for="fontSize">ফন্ট সাইজ:</label>
+      <div class="font-size-control">
+        <input type="range" id="fontSize" min="20" max="80" value="40">
+        <span class="size-display" id="sizeDisplay">40px</span>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button type="submit" id="generateBtn">🎬 ইমেজ তৈরি করুন</button>
+      <button type="button" id="downloadBtn">💾 ডাউনলোড করুন</button>
+      <button type="button" id="copyBtn">📋 কপি করুন</button>
+    </div>
+  </form>
+
+  <!-- Status Message -->
+  <div id="status"></div>
+
+  <!-- Preview Section -->
+  <div class="preview-section" id="previewSection">
+    <h3>প্রিভিউ:</h3>
+    <canvas id="outputCanvas"></canvas>
   </div>
 </div>
-
-<h3>Extracted Bangla Text</h3>
-<textarea id="text-output" readonly></textarea>
-<button id="copy-btn" style="display:none;">📋 Copy Text</button>
-
-<h3>Create Styled Image</h3>
-<input type="text" id="bg-color" value="#f0f0f0" placeholder="Background color (hex)">
-<button id="create-btn" style="display:none;">✨ Create Styled Image</button>
-
-<h3>Output</h3>
-<canvas id="output-canvas" style="display:none;"></canvas>
-<button id="download-btn" style="display:none;">💾 Download Image</button>
-
-<!-- Tesseract.js with Bangla support -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
 
 <script>
-/* ========== HELPER FUNCTIONS ========== */
-function showStatus(msg, error = false) {
-  const s = document.getElementById('status');
-  s.textContent = msg;
-  s.style.color = error ? 'red' : '#555';
-}
+const form = document.getElementById('textForm');
+const textInput = document.getElementById('textInput');
+const bgColorInput = document.getElementById('bgColor');
+const textColorInput = document.getElementById('textColor');
+const fontSizeInput = document.getElementById('fontSize');
+const sizeDisplay = document.getElementById('sizeDisplay');
+const generateBtn = document.getElementById('generateBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const copyBtn = document.getElementById('copyBtn');
+const canvas = document.getElementById('outputCanvas');
+const status = document.getElementById('status');
+const previewSection = document.getElementById('previewSection');
+const templateBtns = document.querySelectorAll('.template-btn');
 
-/* ========== DETECT & REMOVE WATERMARKS ========== */
-function removeWatermarks(canvas) {
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const data = imageData.data;
+let currentTemplate = 'modern';
 
-  // Detect light areas (likely watermarks) and make them white
-  for (let i = 0; i < data.length; i += 4) {
-    const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
-    const brightness = (r + g + b) / 3;
+// Template presets
+const templates = {
+  modern: {
+    bgColor: '#f0f0f0',
+    textColor: '#333333',
+    fontSize: 40,
+    logoColor: '#ff5722',
+    style: 'modern'
+  },
+  classic: {
+    bgColor: '#fffacd',
+    textColor: '#2c3e50',
+    fontSize: 42,
+    logoColor: '#e74c3c',
+    style: 'classic'
+  },
+  artistic: {
+    bgColor: '#ffeaa7',
+    textColor: '#d63031',
+    fontSize: 45,
+    logoColor: '#0984e3',
+    style: 'artistic'
+  },
+  minimal: {
+    bgColor: '#ffffff',
+    textColor: '#000000',
+    fontSize: 38,
+    logoColor: '#95a5a6',
+    style: 'minimal'
+  },
+  dark: {
+    bgColor: '#1a1a1a',
+    textColor: '#ffffff',
+    fontSize: 40,
+    logoColor: '#f39c12',
+    style: 'dark'
+  },
+  gradient: {
+    bgColor: '#667eea',
+    textColor: '#ffffff',
+    fontSize: 42,
+    logoColor: '#764ba2',
+    style: 'gradient'
+  }
+};
+
+// Template selection
+templateBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    templateBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentTemplate = btn.dataset.template;
     
-    // If area is very light (> 200), assume it's watermark
-    if (brightness > 200 && a > 200) {
-      data[i] = 255;     // R
-      data[i+1] = 255;   // G
-      data[i+2] = 255;   // B
-    }
-  }
-
-  ctx.putImageData(imageData, 0, 0);
-}
-
-/* ========== IMAGE INPUT ========== */
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-let uploadedImg = null;
-
-dropZone.addEventListener('click', () => fileInput.click());
-
-dropZone.addEventListener('dragover', e => {
-  e.preventDefault();
-  dropZone.classList.add('hover');
-});
-
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
-
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('hover');
-  handleFile(e.dataTransfer.files[0]);
-});
-
-fileInput.addEventListener('change', e => {
-  if (e.target.files[0]) handleFile(e.target.files[0]);
-});
-
-document.addEventListener('paste', e => {
-  const items = e.clipboardData?.items;
-  if (!items) return;
-  for (const i of items) {
-    if (i.type.startsWith('image/')) {
-      handleFile(i.getAsFile());
-      break;
-    }
-  }
-});
-
-function handleFile(file) {
-  if (!file.type.startsWith('image/')) {
-    showStatus('Please select a valid image file.', true);
-    return;
-  }
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      uploadedImg = img;
-      
-      // Display original
-      document.getElementById('original-img').src = img.src;
-      document.getElementById('original-img').style.display = 'block';
-      
-      // Create cleaned version
-      const cleanedCanvas = document.getElementById('cleaned-canvas');
-      cleanedCanvas.width = img.width;
-      cleanedCanvas.height = img.height;
-      const ctx = cleanedCanvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      removeWatermarks(cleanedCanvas);
-      cleanedCanvas.style.display = 'block';
-      
-      startOCR(cleanedCanvas);
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-/* ========== OCR WITH BANGLA ========== */
-async function startOCR(canvas) {
-  showStatus('Running Bangla OCR – please wait...');
-  
-  try {
-    const { data: { text } } = await Tesseract.recognize(
-      canvas,
-      'ben',  // Bangla language code
-      { logger: m => showStatus(`OCR: ${m.status} (${Math.round(m.progress*100)}%)`) }
-    );
-
-    const cleanText = text.trim();
-    if (!cleanText) {
-      showStatus('⚠️ No readable text found. Try a clearer image.', true);
-      return;
-    }
-
-    document.getElementById('text-output').value = cleanText;
-    showStatus('✅ Text extracted successfully!');
-    document.getElementById('copy-btn').style.display = 'inline-block';
-    document.getElementById('create-btn').style.display = 'inline-block';
-  } catch (err) {
-    showStatus('❌ OCR Error: ' + err.message, true);
-  }
-}
-
-/* ========== COPY TEXT ========== */
-document.getElementById('copy-btn').addEventListener('click', () => {
-  const text = document.getElementById('text-output').value;
-  navigator.clipboard.writeText(text).then(() => {
-    showStatus('✅ Copied to clipboard!');
+    const preset = templates[currentTemplate];
+    bgColorInput.value = preset.bgColor;
+    textColorInput.value = preset.textColor;
+    fontSizeInput.value = preset.fontSize;
+    sizeDisplay.textContent = `${preset.fontSize}px`;
   });
 });
 
-/* ========== CREATE STYLED IMAGE ========== */
-document.getElementById('create-btn').addEventListener('click', () => {
-  const text = document.getElementById('text-output').value;
-  const bgColor = document.getElementById('bg-color').value || '#f0f0f0';
+// Font size update
+fontSizeInput.addEventListener('input', (e) => {
+  sizeDisplay.textContent = `${e.target.value}px`;
+});
 
-  const canvas = document.getElementById('output-canvas');
+// Show status message
+function showStatus(message, type = 'loading') {
+  status.textContent = message;
+  status.className = `show ${type}`;
+  setTimeout(() => {
+    if (type === 'success') {
+      status.classList.remove('show');
+    }
+  }, 3000);
+}
+
+// Generate image
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  
+  const text = textInput.value.trim();
+  if (!text) {
+    showStatus('❌ অনুগ্রহ করে কিছু লেখা লিখুন!', 'error');
+    return;
+  }
+
+  showStatus('🎬 ইমেজ তৈরি করা হচ্ছে...', 'loading');
+
+  setTimeout(() => {
+    generateImage(text);
+    showStatus('✅ ইমেজ সফলভাবে তৈরি হয়েছে!', 'success');
+    downloadBtn.style.display = 'inline-block';
+    copyBtn.style.display = 'inline-block';
+    previewSection.classList.add('active');
+  }, 500);
+});
+
+function generateImage(text) {
+  const bgColor = bgColorInput.value;
+  const textColor = textColorInput.value;
+  const fontSize = parseInt(fontSizeInput.value);
+  const logoColor = templates[currentTemplate].logoColor;
+
   canvas.width = 1000;
   canvas.height = 700;
   const ctx = canvas.getContext('2d');
 
   // Draw background
-  ctx.fillStyle = bgColor;
+  if (currentTemplate === 'gradient') {
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, bgColor);
+    gradient.addColorStop(1, templates[currentTemplate].logoColor);
+    ctx.fillStyle = gradient;
+  } else {
+    ctx.fillStyle = bgColor;
+  }
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Draw text
-  ctx.fillStyle = '#333';
-  ctx.font = '32px "Noto Sans Bengali", Arial';
+  // Draw decorative elements for some templates
+  if (currentTemplate === 'artistic') {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.arc(canvas.width * 0.2, canvas.height * 0.2, 150, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(canvas.width * 0.85, canvas.height * 0.8, 120, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Draw main text
+  ctx.fillStyle = textColor;
+  ctx.font = `bold ${fontSize}px 'Noto Sans Bengali', Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  wrapText(ctx, text, canvas.width / 2, canvas.height / 2 - 50, canvas.width * 0.85, 40);
+  
+  wrapText(ctx, text, canvas.width / 2, canvas.height / 2 - 40, canvas.width * 0.85, fontSize + 10);
 
   // Draw "ARS" logo
-  ctx.fillStyle = '#ff5722';
-  ctx.font = 'bold 90px "Rubik Moonrocks", cursive';
+  ctx.fillStyle = logoColor;
+  ctx.font = `bold 100px 'Rubik Moonrocks', cursive`;
   ctx.textAlign = 'right';
   ctx.textBaseline = 'bottom';
-  ctx.fillText('ARS', canvas.width - 40, canvas.height - 40);
+  ctx.fillText('ARS', canvas.width - 50, canvas.height - 50);
 
-  canvas.style.display = 'block';
-  document.getElementById('download-btn').style.display = 'inline-block';
-  showStatus('✅ Styled image created!');
-});
+  // Add border for some templates
+  if (currentTemplate === 'classic' || currentTemplate === 'minimal') {
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+  }
+}
 
-/* ========== TEXT WRAPPING ========== */
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   const words = text.split(/\s+/);
   let line = '';
@@ -245,20 +512,30 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
   }
 }
 
-/* ========== DOWNLOAD ========== */
-document.getElementById('download-btn').addEventListener('click', () => {
-  const canvas = document.getElementById('output-canvas');
+// Download image
+downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.href = canvas.toDataURL('image/png');
-  link.download = `ARS-${Date.now()}.png`;
+  link.download = `bangla-text-${Date.now()}.png`;
   link.click();
+  showStatus('✅ ইমেজ ডাউনলোড হয়েছে!', 'success');
 });
 
-// Load Bangla font support
-const link = document.createElement('link');
-link.href = 'https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali&display=swap';
-link.rel = 'stylesheet';
-document.head.appendChild(link);
+// Copy canvas to clipboard
+copyBtn.addEventListener('click', () => {
+  canvas.toBlob(blob => {
+    navigator.clipboard.write([
+      new ClipboardItem({ 'image/png': blob })
+    ]).then(() => {
+      showStatus('✅ ইমেজ ক্লিপবোর্ডে কপি হয়েছে!', 'success');
+    });
+  });
+});
+
+// Set initial template
+bgColorInput.value = templates.modern.bgColor;
+textColorInput.value = templates.modern.textColor;
+fontSizeInput.value = templates.modern.fontSize;
 </script>
 
 </body>
