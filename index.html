@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Image‑to‑Text → Styled Image</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Moonrocks&display=swap" rel="stylesheet">
+<style>
+  body {font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding:0 1rem;}
+  h1 {text-align:center;}
+  #drop-zone {
+    border: 2px dashed #aaa; border-radius: 10px; padding: 2rem; text-align:center;
+    color:#666; cursor:pointer; margin-bottom:1rem;
+  }
+  #drop-zone.hover {border-color:#666; background:#f9f9f9;}
+  #output {margin-top:1rem; text-align:center;}
+  canvas {max-width:100%; border:1px solid #ddd;}
+  button {margin-top:0.5rem; padding:0.5rem 1rem; font-size:1rem; cursor:pointer;}
+  #status {margin-top:0.5rem; font-size:0.9rem; color:#555;}
+</style>
+</head>
+<body>
+
+<h1>🖼️ Image Text Extractor & Styled Downloader</h1>
+
+<div id="drop-zone">
+  Click or drag‑&‑drop an image here<br>
+  (or paste with <kbd>Ctrl+V</kbd>)
+</div>
+
+<input type="file" id="file-input" accept="image/*" style="display:none">
+
+<div id="status"></div>
+
+<canvas id="canvas" width="800" height="600" style="display:none;"></canvas>
+
+<div id="output">
+  <button id="download-btn" style="display:none;">💾 Download New Image</button>
+</div>
+
+<!-- Tesseract.js (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.3/dist/tesseract.min.js"></script>
+
+<script>
+/* ---------- Helper Functions ---------- */
+function showStatus(msg, error = false) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.style.color = error ? 'red' : '#555';
+}
+
+/* ---------- Image Input Handling ---------- */
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+let uploadedImg = null;   // Image element once loaded
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('hover');
+});
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('hover');
+  handleFile(e.dataTransfer.files[0]);
+});
+
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+/* Paste from clipboard */
+document.addEventListener('paste', e => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const i of items) {
+    if (i.type.startsWith('image/')) {
+      handleFile(i.getAsFile());
+      break;
+    }
+  }
+});
+
+/* Load selected file as an Image element */
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) {
+    showStatus('Please select a valid image file.', true);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      uploadedImg = img;
+      startProcessing();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ---------- OCR & Canvas Generation ---------- */
+async function startProcessing() {
+  showStatus('Running OCR – please wait...');
+  // 1️⃣ OCR with Tesseract
+  const { data: { text } } = await Tesseract.recognize(
+    uploadedImg,
+    'eng',               // you can change to 'ben' for Bangla, or use 'eng+ben' for both
+    { logger: m => showStatus(`OCR: ${m.status} (${Math.round(m.progress*100)}%)`) }
+  );
+
+  const cleanText = text.trim();
+  if (!cleanText) {
+    showStatus('No readable text found.', true);
+    return;
+  }
+
+  // 2️⃣ Copy text to clipboard automatically
+  const tempTA = document.createElement('textarea');
+  tempTA.value = cleanText;
+  document.body.appendChild(tempTA);
+  tempTA.select();
+  document.execCommand('copy');
+  document.body.removeChild(tempTA);
+  showStatus('Text extracted and copied to clipboard!');
+
+  // 3️⃣ Draw new image on canvas
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // --- a) solid background (choose any single colour) ---
+  const bgColor = '#f0f0f0';               // you can change this colour
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // --- b) optional: draw the original picture as a faint watermark (comment out if not needed) ---
+  // const scale = Math.min(canvas.width / uploadedImg.width, canvas.height / uploadedImg.height);
+  // const w = uploadedImg.width * scale;
+  // const h = uploadedImg.height * scale;
+  // ctx.globalAlpha = 0.15;
+  // ctx.drawImage(uploadedImg, (canvas.width - w)/2, (canvas.height - h)/2, w, h);
+  // ctx.globalAlpha = 1.0;
+
+  // --- c) write the extracted text ---
+  ctx.fillStyle = '#333';
+  ctx.font = '30px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  wrapText(ctx, cleanText, canvas.width / 2, canvas.height / 2, canvas.width * 0.8, 36);
+
+  // --- d) add the stylish “ARS” label ---
+  ctx.fillStyle = '#ff5722';
+  ctx.font = '70px "Rubik Moonrocks", cursive';
+  ctx.textAlign = 'right';
+  ctx.fillText('ARS', canvas.width - 30, canvas.height - 30);
+
+  canvas.style.display = 'block';
+  document.getElementById('download-btn').style.display = 'inline-block';
+}
+
+/* Helper: wrap long text onto multiple lines */
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(/\s+/);
+  let line = '';
+  const lines = [];
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && n > 0) {
+      lines.push(line.trim());
+      line = words[n] + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line.trim());
+
+  const startY = y - (lines.length - 1) * lineHeight / 2;
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], x, startY + i * lineHeight);
+  }
+}
+
+/* ---------- Download Button ---------- */
+document.getElementById('download-btn').addEventListener('click', () => {
+  const canvas = document.getElementById('canvas');
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = 'styled-image.png';
+  link.click();
+});
+</script>
+
+</body>
+</html>
