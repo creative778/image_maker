@@ -3,19 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bangla Text to Image Generator</title>
+<title>Bangla Text to Image Generator - ARS</title>
 <link href="https://fonts.googleapis.com/css2?family=Rubik+Moonrocks&family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   
+  html, body {
+    height: 100%;
+  }
+
   body {
     font-family: 'Noto Sans Bengali', Arial, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
+    padding: 2rem;
+  }
+
+  .main-content {
+    flex: 1;
+    display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
   }
 
   .container {
@@ -23,7 +34,7 @@
     border-radius: 15px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     padding: 3rem;
-    max-width: 600px;
+    max-width: 900px;
     width: 100%;
   }
 
@@ -31,7 +42,7 @@
     text-align: center;
     color: #333;
     margin-bottom: 0.5rem;
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .subtitle {
@@ -41,8 +52,21 @@
     font-size: 0.95rem;
   }
 
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .left-panel, .right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
   .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   label {
@@ -53,43 +77,84 @@
     font-size: 1rem;
   }
 
-  textarea {
+  textarea, input[type="text"], input[type="number"] {
     width: 100%;
     padding: 1rem;
     border: 2px solid #ddd;
     border-radius: 8px;
     font-family: 'Noto Sans Bengali', Arial;
-    font-size: 1.1rem;
-    resize: vertical;
-    min-height: 120px;
+    font-size: 1rem;
     transition: border-color 0.3s;
   }
 
-  textarea:focus {
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  textarea:focus, input:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
   }
 
-  .settings {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+  /* Template Styles */
+  .template-group {
     margin-bottom: 1.5rem;
   }
 
-  .color-group {
-    display: flex;
-    flex-direction: column;
+  .template-group label {
+    margin-bottom: 0.8rem;
   }
 
-  .color-group label {
-    margin-bottom: 0.4rem;
+  .templates {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+
+  .template-btn {
+    padding: 1rem;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
     font-size: 0.9rem;
+    text-align: left;
+  }
+
+  .template-btn:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+  }
+
+  .template-btn.active {
+    border-color: #667eea;
+    background: #667eea;
+    color: white;
+  }
+
+  .template-name {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+
+  .template-desc {
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  /* Color Picker */
+  .color-group {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.8rem;
+    align-items: flex-end;
   }
 
   .color-picker {
-    width: 100%;
+    width: 50px;
     height: 45px;
     border: 2px solid #ddd;
     border-radius: 8px;
@@ -97,15 +162,124 @@
     background: white;
   }
 
+  /* Font Size Control */
+  .font-size-control {
+    display: grid;
+    grid-template-columns: 1fr 60px;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  input[type="range"] {
+    width: 100%;
+  }
+
+  .size-display {
+    text-align: center;
+    color: #667eea;
+    font-weight: 600;
+    padding: 0.5rem;
+    background: #f0f4ff;
+    border-radius: 6px;
+  }
+
+  /* Watermark Section */
+  .watermark-section {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px solid #eee;
+  }
+
+  .watermark-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .watermark-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .watermark-input-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .watermark-input-group label {
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+  }
+
+  .watermark-input-group input {
+    padding: 0.8rem;
+  }
+
+  /* Advanced Features */
+  .advanced-section {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px solid #eee;
+  }
+
+  .advanced-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .feature-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding: 0.8rem;
+    background: white;
+    border-radius: 6px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+    background: #ddd;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  .toggle-switch.active {
+    background: #4CAF50;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    transition: left 0.3s;
+  }
+
+  .toggle-switch.active .toggle-slider {
+    left: 24px;
+  }
+
+  /* Buttons */
   .button-group {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 1rem;
     margin-top: 2rem;
   }
 
   button {
-    padding: 0.9rem 1.5rem;
+    padding: 1rem;
     font-size: 1rem;
     border: none;
     border-radius: 8px;
@@ -113,12 +287,16 @@
     transition: all 0.3s;
     font-weight: 600;
     font-family: 'Noto Sans Bengali', Arial;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   #generateBtn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    grid-column: 1 / 3;
+    grid-column: 1 / 4;
   }
 
   #generateBtn:hover {
@@ -150,27 +328,20 @@
     background: #0b7dda;
   }
 
-  .preview-section {
-    margin-top: 2rem;
-    text-align: center;
+  #resetBtn {
+    background: #f44336;
+    color: white;
     display: none;
   }
 
-  .preview-section.active {
-    display: block;
+  #resetBtn:hover {
+    background: #da190b;
   }
 
-  #outputCanvas {
-    max-width: 100%;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    margin: 1rem 0;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  }
-
+  /* Status Message */
   #status {
     text-align: center;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
     padding: 1rem;
     border-radius: 8px;
     font-size: 0.95rem;
@@ -199,130 +370,275 @@
     border: 1px solid #bee5eb;
   }
 
-  .template-group {
-    margin-bottom: 1.5rem;
+  /* Preview Section */
+  .preview-section {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #f9f9f9;
+    border-radius: 10px;
+    display: none;
   }
 
-  .templates {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.8rem;
+  .preview-section.active {
+    display: block;
   }
 
-  .template-btn {
-    padding: 0.6rem;
-    border: 2px solid #ddd;
-    background: white;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 0.9rem;
-  }
-
-  .template-btn:hover {
-    border-color: #667eea;
-    background: #f0f4ff;
-  }
-
-  .template-btn.active {
-    border-color: #667eea;
-    background: #667eea;
-    color: white;
-  }
-
-  .font-size-control {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  input[type="range"] {
-    flex: 1;
-  }
-
-  .size-display {
-    min-width: 50px;
+  .preview-section h3 {
     text-align: center;
-    color: #667eea;
-    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  #outputCanvas {
+    width: 100%;
+    max-width: 600px;
+    display: block;
+    margin: 0 auto;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Footer */
+  footer {
+    background: rgba(0, 0, 0, 0.2);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  footer a {
+    color: #ffeb3b;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  footer a:hover {
+    color: #fff;
+  }
+
+  @media (max-width: 768px) {
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .templates {
+      grid-template-columns: 1fr;
+    }
+
+    .button-group {
+      grid-template-columns: 1fr;
+    }
+
+    #generateBtn {
+      grid-column: 1;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+    }
+  }
+
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>✨ বাংলা টেক্সট ইমেজ জেনারেটর</h1>
-  <p class="subtitle">আপনার বাংলা লেখা সুন্দর ছবিতে রূপান্তরিত করুন</p>
+<div class="main-content">
+  <div class="container">
+    <h1>✨ বাংলা ইমেজ জেনারেটর</h1>
+    <p class="subtitle">আপনার বাংলা লেখা সুন্দর ছবিতে রূপান্তরিত করুন - Facebook পোস্টের জন্য উপযুক্ত</p>
 
-  <form id="textForm">
-    <!-- Text Input -->
-    <div class="form-group">
-      <label for="textInput">📝 আপনার বাংলা লেখা লিখুন:</label>
-      <textarea 
-        id="textInput" 
-        placeholder="উদাহরণ: আমার নাম আবদুর রহমান"
-        required>
-      </textarea>
-    </div>
+    <form id="textForm">
+      <div class="form-grid">
+        <!-- Left Panel -->
+        <div class="left-panel">
+          <!-- Text Input -->
+          <div class="form-group">
+            <label for="textInput"><i class="fas fa-pen"></i> আপনার বাংলা লেখা লিখুন:</label>
+            <textarea 
+              id="textInput" 
+              placeholder="উদাহরণ: আমার নাম আবদুর রহমান"
+              required>
+            </textarea>
+          </div>
 
-    <!-- Template Selection -->
-    <div class="template-group">
-      <label>🎨 টেমপ্লেট নির্বাচন করুন:</label>
-      <div class="templates">
-        <button type="button" class="template-btn active" data-template="modern">আধুনিক</button>
-        <button type="button" class="template-btn" data-template="classic">ক্লাসিক</button>
-        <button type="button" class="template-btn" data-template="artistic">শিল্পকর্ম</button>
-        <button type="button" class="template-btn" data-template="minimal">মিনিমাল</button>
-        <button type="button" class="template-btn" data-template="dark">অন্ধকার</button>
-        <button type="button" class="template-btn" data-template="gradient">গ্রেডিয়েন্ট</button>
+          <!-- Template Selection -->
+          <div class="template-group">
+            <label><i class="fas fa-palette"></i> ফেসবুক টেমপ্লেট নির্বাচন করুন:</label>
+            <div class="templates">
+              <button type="button" class="template-btn active" data-template="facebook-blue">
+                <div class="template-name">📱 Facebook Blue</div>
+                <div class="template-desc">নীল পটভূমি</div>
+              </button>
+              <button type="button" class="template-btn" data-template="facebook-trending">
+                <div class="template-name">🔥 Trending</div>
+                <div class="template-desc">উজ্জ্বল লাল</div>
+              </button>
+              <button type="button" class="template-btn" data-template="facebook-gradient">
+                <div class="template-name">🎨 Gradient</div>
+                <div class="template-desc">গ্রেডিয়েন্ট</div>
+              </button>
+              <button type="button" class="template-btn" data-template="facebook-dark">
+                <div class="template-name">🌙 Dark Mode</div>
+                <div class="template-desc">অন্ধকার থিম</div>
+              </button>
+              <button type="button" class="template-btn" data-template="facebook-light">
+                <div class="template-name">☀️ Light</div>
+                <div class="template-desc">হালকা পটভূমি</div>
+              </button>
+              <button type="button" class="template-btn" data-template="facebook-quote">
+                <div class="template-name">💬 Quote</div>
+                <div class="template-desc">উদ্ধৃতি স্টাইল</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Watermark Section -->
+          <div class="watermark-section">
+            <h3><i class="fas fa-water"></i> ওয়াটারমার্ক কাস্টমাইজেশন</h3>
+            <div class="watermark-inputs">
+              <div class="watermark-input-group">
+                <label for="watermarkTopLeft">🔝 উপরের বাম কোণ:</label>
+                <input type="text" id="watermarkTopLeft" placeholder="উদাহরণ: © ARS" value="ARS">
+              </div>
+              <div class="watermark-input-group">
+                <label for="watermarkBottomRight">🔻 নিচের ডান কোণ:</label>
+                <input type="text" id="watermarkBottomRight" placeholder="উদাহরণ: Abdur Rahman" value="Abdur Rahman Sheikh">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+          <!-- Customization Settings -->
+          <div class="form-group">
+            <label><i class="fas fa-swatches"></i> রঙ কাস্টমাইজেশন</label>
+            <div class="color-group">
+              <div>
+                <label style="font-size: 0.9rem; margin-bottom: 0.3rem;">পটভূমি রঙ:</label>
+                <input type="color" id="bgColor" class="color-picker" value="#1877f2">
+              </div>
+            </div>
+            <div class="color-group" style="margin-top: 1rem;">
+              <div>
+                <label style="font-size: 0.9rem; margin-bottom: 0.3rem;">লেখার রঙ:</label>
+                <input type="color" id="textColor" class="color-picker" value="#ffffff">
+              </div>
+            </div>
+            <div class="color-group" style="margin-top: 1rem;">
+              <div>
+                <label style="font-size: 0.9rem; margin-bottom: 0.3rem;">ওয়াটারমার্ক রঙ:</label>
+                <input type="color" id="watermarkColor" class="color-picker" value="#ff5722">
+              </div>
+            </div>
+          </div>
+
+          <!-- Font Size Control -->
+          <div class="form-group">
+            <label for="fontSize"><i class="fas fa-text-height"></i> ফন্ট সাইজ:</label>
+            <div class="font-size-control">
+              <input type="range" id="fontSize" min="20" max="100" value="40">
+              <span class="size-display" id="sizeDisplay">40px</span>
+            </div>
+          </div>
+
+          <!-- Advanced Features -->
+          <div class="advanced-section">
+            <h3><i class="fas fa-cogs"></i> উন্নত বৈশিষ্ট্য</h3>
+            <div class="feature-toggle">
+              <span>ছবির চারপাশে বর্ডার:</span>
+              <div class="toggle-switch active" data-feature="border">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+            <div class="feature-toggle">
+              <span>ছায়া প্রভাব:</span>
+              <div class="toggle-switch active" data-feature="shadow">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+            <div class="feature-toggle">
+              <span>পটভূমি প্যাটার্ন:</span>
+              <div class="toggle-switch" data-feature="pattern">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+            <div class="feature-toggle">
+              <span>কেন্দ্রীয় সমন্বয়:</span>
+              <div class="toggle-switch active" data-feature="centered">
+                <div class="toggle-slider"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image Dimensions -->
+          <div class="form-group">
+            <label><i class="fas fa-expand"></i> ছবির আকার (Facebook):</label>
+            <select id="imageDimension" style="padding: 0.8rem; border: 2px solid #ddd; border-radius: 8px;">
+              <option value="1200x628">Feed Post (1200x628)</option>
+              <option value="1080x1080">Square (1080x1080)</option>
+              <option value="1200x1500">Portrait (1200x1500)</option>
+            </select>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <!-- Customization Settings -->
-    <div class="settings">
-      <div class="color-group">
-        <label for="bgColor">পটভূমি রঙ:</label>
-        <input type="color" id="bgColor" class="color-picker" value="#f0f0f0">
+      <!-- Buttons -->
+      <div class="button-group">
+        <button type="submit" id="generateBtn">
+          <i class="fas fa-magic"></i> ইমেজ তৈরি করুন
+        </button>
+        <button type="button" id="downloadBtn">
+          <i class="fas fa-download"></i> ডাউনলোড করুন
+        </button>
+        <button type="button" id="copyBtn">
+          <i class="fas fa-copy"></i> কপি করুন
+        </button>
       </div>
+    </form>
 
-      <div class="color-group">
-        <label for="textColor">লেখার রঙ:</label>
-        <input type="color" id="textColor" class="color-picker" value="#333333">
-      </div>
+    <!-- Status Message -->
+    <div id="status"></div>
+
+    <!-- Preview Section -->
+    <div class="preview-section" id="previewSection">
+      <h3>📸 প্রিভিউ:</h3>
+      <canvas id="outputCanvas"></canvas>
     </div>
-
-    <!-- Font Size Control -->
-    <div class="form-group">
-      <label for="fontSize">ফন্ট সাইজ:</label>
-      <div class="font-size-control">
-        <input type="range" id="fontSize" min="20" max="80" value="40">
-        <span class="size-display" id="sizeDisplay">40px</span>
-      </div>
-    </div>
-
-    <!-- Buttons -->
-    <div class="button-group">
-      <button type="submit" id="generateBtn">🎬 ইমেজ তৈরি করুন</button>
-      <button type="button" id="downloadBtn">💾 ডাউনলোড করুন</button>
-      <button type="button" id="copyBtn">📋 কপি করুন</button>
-    </div>
-  </form>
-
-  <!-- Status Message -->
-  <div id="status"></div>
-
-  <!-- Preview Section -->
-  <div class="preview-section" id="previewSection">
-    <h3>প্রিভিউ:</h3>
-    <canvas id="outputCanvas"></canvas>
   </div>
 </div>
+
+<!-- Footer -->
+<footer>
+  <p>
+    এই সাইট তৈরি করেছেন <strong>ARS (Abdur Rahman Sheikh)</strong> ভালোবাসা দিয়ে ❤
+    <br>
+    <small>© 2024 Bangla Text Image Generator. সকল অধিকার সংরক্ষিত।</small>
+  </p>
+</footer>
 
 <script>
 const form = document.getElementById('textForm');
 const textInput = document.getElementById('textInput');
 const bgColorInput = document.getElementById('bgColor');
 const textColorInput = document.getElementById('textColor');
+const watermarkColorInput = document.getElementById('watermarkColor');
 const fontSizeInput = document.getElementById('fontSize');
 const sizeDisplay = document.getElementById('sizeDisplay');
 const generateBtn = document.getElementById('generateBtn');
@@ -332,52 +648,62 @@ const canvas = document.getElementById('outputCanvas');
 const status = document.getElementById('status');
 const previewSection = document.getElementById('previewSection');
 const templateBtns = document.querySelectorAll('.template-btn');
+const toggleSwitches = document.querySelectorAll('.toggle-switch');
+const watermarkTopLeftInput = document.getElementById('watermarkTopLeft');
+const watermarkBottomRightInput = document.getElementById('watermarkBottomRight');
+const imageDimensionSelect = document.getElementById('imageDimension');
 
-let currentTemplate = 'modern';
+let currentTemplate = 'facebook-blue';
+let features = {
+  border: true,
+  shadow: true,
+  pattern: false,
+  centered: true
+};
 
-// Template presets
+// Template presets (Facebook optimized)
 const templates = {
-  modern: {
-    bgColor: '#f0f0f0',
-    textColor: '#333333',
+  'facebook-blue': {
+    bgColor: '#1877f2',
+    textColor: '#ffffff',
     fontSize: 40,
-    logoColor: '#ff5722',
-    style: 'modern'
+    watermarkColor: '#ffd700',
+    description: 'Facebook Blue'
   },
-  classic: {
-    bgColor: '#fffacd',
-    textColor: '#2c3e50',
+  'facebook-trending': {
+    bgColor: '#ff6b6b',
+    textColor: '#ffffff',
     fontSize: 42,
-    logoColor: '#e74c3c',
-    style: 'classic'
+    watermarkColor: '#ffeb3b',
+    description: 'Trending Red'
   },
-  artistic: {
-    bgColor: '#ffeaa7',
-    textColor: '#d63031',
-    fontSize: 45,
-    logoColor: '#0984e3',
-    style: 'artistic'
+  'facebook-gradient': {
+    bgColor: '#667eea',
+    textColor: '#ffffff',
+    fontSize: 40,
+    watermarkColor: '#764ba2',
+    description: 'Gradient'
   },
-  minimal: {
-    bgColor: '#ffffff',
-    textColor: '#000000',
-    fontSize: 38,
-    logoColor: '#95a5a6',
-    style: 'minimal'
-  },
-  dark: {
+  'facebook-dark': {
     bgColor: '#1a1a1a',
     textColor: '#ffffff',
     fontSize: 40,
-    logoColor: '#f39c12',
-    style: 'dark'
+    watermarkColor: '#00d4ff',
+    description: 'Dark Mode'
   },
-  gradient: {
-    bgColor: '#667eea',
-    textColor: '#ffffff',
+  'facebook-light': {
+    bgColor: '#f5f5f5',
+    textColor: '#333333',
+    fontSize: 40,
+    watermarkColor: '#ff5722',
+    description: 'Light'
+  },
+  'facebook-quote': {
+    bgColor: '#fff9e6',
+    textColor: '#d32f2f',
     fontSize: 42,
-    logoColor: '#764ba2',
-    style: 'gradient'
+    watermarkColor: '#ff6f00',
+    description: 'Quote'
   }
 };
 
@@ -393,6 +719,7 @@ templateBtns.forEach(btn => {
     bgColorInput.value = preset.bgColor;
     textColorInput.value = preset.textColor;
     fontSizeInput.value = preset.fontSize;
+    watermarkColorInput.value = preset.watermarkColor;
     sizeDisplay.textContent = `${preset.fontSize}px`;
   });
 });
@@ -400,6 +727,15 @@ templateBtns.forEach(btn => {
 // Font size update
 fontSizeInput.addEventListener('input', (e) => {
   sizeDisplay.textContent = `${e.target.value}px`;
+});
+
+// Toggle features
+toggleSwitches.forEach(toggle => {
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('active');
+    const feature = toggle.dataset.feature;
+    features[feature] = toggle.classList.contains('active');
+  });
 });
 
 // Show status message
@@ -428,8 +764,8 @@ form.addEventListener('submit', (e) => {
   setTimeout(() => {
     generateImage(text);
     showStatus('✅ ইমেজ সফলভাবে তৈরি হয়েছে!', 'success');
-    downloadBtn.style.display = 'inline-block';
-    copyBtn.style.display = 'inline-block';
+    downloadBtn.style.display = 'inline-flex';
+    copyBtn.style.display = 'inline-flex';
     previewSection.classList.add('active');
   }, 500);
 });
@@ -438,32 +774,48 @@ function generateImage(text) {
   const bgColor = bgColorInput.value;
   const textColor = textColorInput.value;
   const fontSize = parseInt(fontSizeInput.value);
-  const logoColor = templates[currentTemplate].logoColor;
+  const watermarkColor = watermarkColorInput.value;
+  const watermarkTopLeft = watermarkTopLeftInput.value || 'ARS';
+  const watermarkBottomRight = watermarkBottomRightInput.value || 'Abdur Rahman Sheikh';
 
-  canvas.width = 1000;
-  canvas.height = 700;
+  // Get dimensions
+  const dimensions = imageDimensionSelect.value.split('x');
+  const width = parseInt(dimensions[0]);
+  const height = parseInt(dimensions[1]);
+
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d');
 
   // Draw background
-  if (currentTemplate === 'gradient') {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  if (currentTemplate === 'facebook-gradient') {
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, bgColor);
-    gradient.addColorStop(1, templates[currentTemplate].logoColor);
+    gradient.addColorStop(1, watermarkColor);
     ctx.fillStyle = gradient;
   } else {
     ctx.fillStyle = bgColor;
   }
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, width, height);
 
-  // Draw decorative elements for some templates
-  if (currentTemplate === 'artistic') {
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    ctx.beginPath();
-    ctx.arc(canvas.width * 0.2, canvas.height * 0.2, 150, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(canvas.width * 0.85, canvas.height * 0.8, 120, 0, Math.PI * 2);
-    ctx.fill();
+  // Draw pattern if enabled
+  if (features.pattern) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    for (let i = 0; i < width; i += 50) {
+      for (let j = 0; j < height; j += 50) {
+        ctx.fillRect(i, j, 40, 40);
+      }
+    }
+  }
+
+  // Draw shadow effect if enabled
+  if (features.shadow) {
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+  } else {
+    ctx.shadowColor = 'transparent';
   }
 
   // Draw main text
@@ -472,21 +824,35 @@ function generateImage(text) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   
-  wrapText(ctx, text, canvas.width / 2, canvas.height / 2 - 40, canvas.width * 0.85, fontSize + 10);
+  const centerY = features.centered ? height / 2 : height / 2 - 40;
+  wrapText(ctx, text, width / 2, centerY, width * 0.85, fontSize + 15);
 
-  // Draw "ARS" logo
-  ctx.fillStyle = logoColor;
-  ctx.font = `bold 100px 'Rubik Moonrocks', cursive`;
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'bottom';
-  ctx.fillText('ARS', canvas.width - 50, canvas.height - 50);
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
 
-  // Add border for some templates
-  if (currentTemplate === 'classic' || currentTemplate === 'minimal') {
+  // Draw border if enabled
+  if (features.border) {
     ctx.strokeStyle = textColor;
     ctx.lineWidth = 3;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+    ctx.globalAlpha = 0.5;
+    ctx.strokeRect(15, 15, width - 30, height - 30);
+    ctx.globalAlpha = 1.0;
   }
+
+  // Draw watermarks
+  // Top Left
+  ctx.fillStyle = watermarkColor;
+  ctx.font = `bold 20px 'Noto Sans Bengali', Arial`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.globalAlpha = 0.8;
+  ctx.fillText(watermarkTopLeft, 20, 20);
+
+  // Bottom Right
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(watermarkBottomRight, width - 20, height - 20);
+  ctx.globalAlpha = 1.0;
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -516,26 +882,29 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
 downloadBtn.addEventListener('click', () => {
   const link = document.createElement('a');
   link.href = canvas.toDataURL('image/png');
-  link.download = `bangla-text-${Date.now()}.png`;
+  link.download = `bangla-image-${Date.now()}.png`;
   link.click();
   showStatus('✅ ইমেজ ডাউনলোড হয়েছে!', 'success');
 });
 
-// Copy canvas to clipboard
+// Copy to clipboard
 copyBtn.addEventListener('click', () => {
   canvas.toBlob(blob => {
     navigator.clipboard.write([
       new ClipboardItem({ 'image/png': blob })
     ]).then(() => {
       showStatus('✅ ইমেজ ক্লিপবোর্ডে কপি হয়েছে!', 'success');
+    }).catch(() => {
+      showStatus('❌ কপি করতে সমস্যা হয়েছে', 'error');
     });
   });
 });
 
-// Set initial template
-bgColorInput.value = templates.modern.bgColor;
-textColorInput.value = templates.modern.textColor;
-fontSizeInput.value = templates.modern.fontSize;
+// Set initial template values
+bgColorInput.value = templates['facebook-blue'].bgColor;
+textColorInput.value = templates['facebook-blue'].textColor;
+fontSizeInput.value = templates['facebook-blue'].fontSize;
+watermarkColorInput.value = templates['facebook-blue'].watermarkColor;
 </script>
 
 </body>
